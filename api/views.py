@@ -23,7 +23,7 @@ class PostFilter(FilterSet):
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    permissions_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = PostFilter
 
