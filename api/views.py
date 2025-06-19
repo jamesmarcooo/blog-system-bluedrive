@@ -1,7 +1,11 @@
 import django_filters
+
+from django.contrib.auth.models import User
+from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFromToRangeFilter
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.response import Response
+from typing import Type
 
 from blog.models import Post, Comment
 from api.serializers import PostListSerializer, PostDetailSerializer, CommentSerializer
@@ -21,12 +25,12 @@ class PostViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PostFilter
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         if self.action == "list":
             return Post.objects.filter(active=True).select_related("author")
         return Post.objects.all().select_related("author")
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> Type[PostListSerializer | PostDetailSerializer]:
         if self.action == "list":
             return PostListSerializer
         return PostDetailSerializer
@@ -37,10 +41,10 @@ class CommentCreateAPIView(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        post_id = self.kwargs.get("post_pk")
+    def create(self, request: Response, **kwargs: dict) -> Response:
+        post_id: int = self.kwargs.get("post_pk")
         try:
-            post = Post.objects.get(pk=post_id)
+            post: Post = Post.objects.get(pk=post_id)
         except Post.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -53,9 +57,9 @@ class CommentCreateAPIView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = request.user if request.user.is_authenticated else None
+        user: User = request.user if request.user.is_authenticated else None
         serializer.save(post=post, user=user)
 
-        headers = self.get_success_headers(serializer.data)
+        headers: dict[str, str] = self.get_success_headers(serializer.data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
