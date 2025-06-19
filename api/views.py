@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFr
 from rest_framework import viewsets
 
 from blog.models import Post
-from api.serializers import PostListSerializer
+from api.serializers import PostListSerializer, PostDetailSerializer
 
 
 class PostFilter(FilterSet):
@@ -28,3 +28,4 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return PostListSerializer
+        return PostDetailSerializer
