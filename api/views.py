@@ -25,10 +25,13 @@ class PostViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PostFilter
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> QuerySet[Post]:
+        queryset: QuerySet = Post.objects.all()
         if self.action == "list":
-            return Post.objects.filter(active=True).select_related("author")
-        return Post.objects.all().select_related("author")
+            return queryset.filter(active=True).select_related("author")
+        if self.action == "retrieve":
+            return queryset.select_related("author").prefetch_related("comments")
+        return queryset
 
     def get_serializer_class(self) -> Type[PostListSerializer | PostDetailSerializer]:
         if self.action == "list":
