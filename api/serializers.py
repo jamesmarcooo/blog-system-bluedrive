@@ -9,6 +9,14 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = ["name", "email"]
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ["id", "content", "user", "created"]
+
+
 class PostListSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.name", read_only=True)
 
@@ -19,6 +27,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
 class PostDetailSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.name", read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
