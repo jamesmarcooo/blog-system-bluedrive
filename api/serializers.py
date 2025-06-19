@@ -31,11 +31,13 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "title", "content", "published_date", "author_name", "active", "comments"]
+        fields = ["id", "title", "content", "published_date", "author_name", "active",  "status", "comments"]
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source="author.name", read_only=True)
+
     class Meta:
         model = Post
-        fields = ["title", "content", "status", "active"]
+        fields = ["id", "title", "content","published_date", "author_name","status"]
 
