@@ -9,6 +9,7 @@ from typing import Type
 
 from blog.models import Author, Comment, Post
 from api.serializers import PostListSerializer, PostDetailSerializer, PostCreateSerializer, CommentSerializer
+from api.permissions import IsAuthorOrReadOnly
 
 
 class PostFilter(FilterSet):
@@ -22,6 +23,7 @@ class PostFilter(FilterSet):
 
 
 class PostViewSet(viewsets.ModelViewSet):
+    permissions_classes = [IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = PostFilter
 
@@ -41,6 +43,9 @@ class PostViewSet(viewsets.ModelViewSet):
         return PostDetailSerializer
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise exceptions.PermissionDenied("You must be logged in to create a post.")
+
         try:
             author: Author = Author.objects.get(user=self.request.user)
             serializer.save(author=author)
