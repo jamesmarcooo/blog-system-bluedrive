@@ -44,10 +44,16 @@ class CommentCreateAPIView(generics.CreateAPIView):
         except Post.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        user = request.user
+        if not post.active:
+            return Response(
+                {"error": "Cannot comment on an inactive post."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        user = request.user if request.user.is_authenticated else None
         serializer.save(post=post, user=user)
 
         headers = self.get_success_headers(serializer.data)
