@@ -3,12 +3,12 @@ import django_filters
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFromToRangeFilter
-from rest_framework import viewsets, generics, permissions, status
+from rest_framework import viewsets, generics, permissions, status, exceptions
 from rest_framework.response import Response
 from typing import Type
 
-from blog.models import Post, Comment
-from api.serializers import PostListSerializer, PostDetailSerializer, CommentSerializer
+from blog.models import Author, Comment, Post
+from api.serializers import PostListSerializer, PostDetailSerializer, PostCreateSerializer, CommentSerializer
 
 
 class PostFilter(FilterSet):
@@ -33,10 +33,19 @@ class PostViewSet(viewsets.ModelViewSet):
             return queryset.select_related("author").prefetch_related("comments")
         return queryset
 
-    def get_serializer_class(self) -> Type[PostListSerializer | PostDetailSerializer]:
+    def get_serializer_class(self) -> Type[PostListSerializer | PostDetailSerializer | PostCreateSerializer]:
         if self.action == "list":
             return PostListSerializer
+        if self.action == "create":
+            return PostCreateSerializer
         return PostDetailSerializer
+
+    def perform_create(self, serializer):
+        try:
+            author: Author = Author.objects.get(user=self.request.user)
+            serializer.save(author=author)
+        except Author.DoesNotExist:
+            raise exceptions.PermissionDenied("You do not have an author profile to create a post.")
 
 
 class CommentCreateAPIView(generics.CreateAPIView):
