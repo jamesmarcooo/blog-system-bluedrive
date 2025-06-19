@@ -1,9 +1,10 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFromToRangeFilter
-from rest_framework import viewsets
+from rest_framework import viewsets, generics, permissions, status
+from rest_framework.response import Response
 
-from blog.models import Post
-from api.serializers import PostListSerializer, PostDetailSerializer
+from blog.models import Post, Comment
+from api.serializers import PostListSerializer, PostDetailSerializer, CommentSerializer
 
 
 class PostFilter(FilterSet):
@@ -29,3 +30,26 @@ class PostViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return PostListSerializer
         return PostDetailSerializer
+
+
+class CommentCreateAPIView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        post_id = self.kwargs.get("post_pk")
+        try:
+            post = Post.objects.get(pk=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(post=post, user=user)
+
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
