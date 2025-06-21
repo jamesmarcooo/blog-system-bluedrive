@@ -14,8 +14,8 @@ class Author(models.Model):
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
+    title = models.CharField(max_length=200, blank=False)
+    content = models.TextField(blank=False)
     published_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
         Author,
@@ -36,7 +36,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
-    content = models.TextField()
+    content = models.TextField(blank=False)
     user = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

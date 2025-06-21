@@ -72,6 +72,19 @@ class TestPostCreation:
         assert "You do not have an author profile" in response.data["detail"]
         assert Post.objects.count() == 0
 
+    def test_create_post_with_duplicate_title_fails(self, authenticated_author_client, post_factory):
+        client, author = authenticated_author_client
+
+        post_factory(title="A Unique Title")
+        url = reverse("post-list")
+
+        data = {"title": "A Unique Title", "content": "Some other content."}
+        response = client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "A post with this title already exists." in str(response.data['title'])
+        assert Post.objects.count() == 1
+
 
 class TestPostEditing:
     def test_edit_post_as_owner_succeeds(self, authenticated_author_client, post_factory):
@@ -175,3 +188,42 @@ class TestCommentCreation:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Post not found" in response.data["error"]
+
+    def test_create_comment_with_valid_length_succeeds(self, api_client, user_factory, post_factory):
+        post = post_factory(active=True)
+        user = user_factory(username="commenter")
+        api_client.force_authenticate(user=user)
+        url = reverse('post-comment-create', kwargs={'post_pk': post.pk})
+        data = {"content": "This is a good comment."}
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert post.comments.count() == 1
+
+    @pytest.mark.parametrize(
+        "invalid_content, expected_error",
+        [
+            ("2", "at least 2 characters long"),
+            ("a" * 3001, "cannot exceed 3000 characters"),
+        ]
+    )
+    def test_create_comment_with_invalid_length_fails(
+        self,
+        api_client,
+        user_factory,
+        post_factory,
+        invalid_content,
+        expected_error
+    ):
+        post = post_factory(active=True)
+        user = user_factory(username="another_commenter")
+        api_client.force_authenticate(user=user)
+        url = reverse('post-comment-create', kwargs={'post_pk': post.pk})
+        data = {"content": invalid_content}
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert expected_error in str(response.data['content'])
+        assert post.comments.count() == 0
