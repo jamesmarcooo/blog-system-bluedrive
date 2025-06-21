@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from api.permissions import IsAuthorOrReadOnly
 
 pytestmark = pytest.mark.django_db
@@ -11,13 +13,13 @@ class TestIsAuthorOrReadOnly:
         permission = IsAuthorOrReadOnly()
 
         get_request = MagicMock()
-        get_request.method = 'GET'
+        get_request.method = "GET"
 
         head_request = MagicMock()
-        head_request.method = 'HEAD'
+        head_request.method = "HEAD"
 
         options_request = MagicMock()
-        options_request.method = 'OPTIONS'
+        options_request.method = "OPTIONS"
 
         post_obj = post_factory()
 
@@ -32,7 +34,7 @@ class TestIsAuthorOrReadOnly:
         post_obj = post_factory(author=author)
 
         request = MagicMock()
-        request.method = 'PUT'
+        request.method = "PUT"
         request.user = author.user
 
         assert permission.has_object_permission(request, MagicMock(), post_obj) is True
@@ -46,7 +48,7 @@ class TestIsAuthorOrReadOnly:
         imposter_user = user_factory(username="imposter")
 
         request = MagicMock()
-        request.method = 'DELETE'
+        request.method = "DELETE"
         request.user = imposter_user
 
         assert permission.has_object_permission(request, MagicMock(), post_obj) is False
@@ -59,7 +61,7 @@ class TestIsAuthorOrReadOnly:
         anonymous_user.is_authenticated = False
 
         request = MagicMock()
-        request.method = 'PATCH'
+        request.method = "PATCH"
         request.user = anonymous_user
 
 

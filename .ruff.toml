@@ -5,8 +5,8 @@ exclude = [
   "__pypackages__",
   "node_modules",
   "venv",
-  "saleor-venv",
-  "saleor/*/migrations",
+  "blog/migrations",
+  "tests",
 ]
 extend-select = [
   "A",
