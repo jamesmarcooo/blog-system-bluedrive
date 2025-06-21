@@ -1,9 +1,9 @@
-import pytest
-from django.db import IntegrityError
-from django.contrib.auth.models import User
-from blog.models import Author, Post, Comment
 from datetime import datetime
+
+import pytest
+
 from blog import PostStatus
+from blog.models import Author, Comment, Post
 
 pytestmark = pytest.mark.django_db
 

@@ -6,6 +6,7 @@ exclude = [
   "node_modules",
   "venv",
   "blog/migrations",
+  "tests",
 ]
 extend-select = [
   "A",
