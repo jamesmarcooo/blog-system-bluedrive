@@ -1,5 +1,7 @@
 import os
+
 from pathlib import Path
+
 
 def get_list(text: str) -> list[str]:
     return [item.strip() for item in text.split(",")]
@@ -84,14 +86,14 @@ WSGI_APPLICATION = "blog_system.wsgi.application"
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST', default='localhost'),
-        'PORT': os.environ.get('DATABASE_PORT', default=5432),
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.environ.get("DATABASE_NAME"),
+        "USER": os.environ.get("DATABASE_USER"),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+        "HOST": os.environ.get("DATABASE_HOST", default="localhost"),
+        "PORT": os.environ.get("DATABASE_PORT", default=5432),
+    },
 }
 
 
@@ -100,7 +102,10 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
