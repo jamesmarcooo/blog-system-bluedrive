@@ -20,6 +20,7 @@ DEBUG = (os.environ.get("DEBUG") == "True")
 
 ALLOWED_HOSTS = get_list(os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1"))
 
+CSRF_TRUSTED_ORIGINS = get_list(os.environ.get("CSRF_TRUSTED_ORIGINS","https://127.0.0.1"))
 
 # Application definition
 
