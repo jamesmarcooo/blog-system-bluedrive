@@ -16,6 +16,13 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ["id", "content", "user", "created"]
 
+    def validate_content(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("Comment must be at least 2 characters long.")
+        if len(value) > 3000:
+            raise serializers.ValidationError("Comment cannot exceed 3000 characters.")
+        return value
+
 
 class PostListSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.name", read_only=True)

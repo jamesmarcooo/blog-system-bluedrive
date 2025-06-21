@@ -188,3 +188,42 @@ class TestCommentCreation:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Post not found" in response.data["error"]
+
+    def test_create_comment_with_valid_length_succeeds(self, api_client, user_factory, post_factory):
+        post = post_factory(active=True)
+        user = user_factory(username="commenter")
+        api_client.force_authenticate(user=user)
+        url = reverse('post-comment-create', kwargs={'post_pk': post.pk})
+        data = {"content": "This is a good comment."}
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert post.comments.count() == 1
+
+    @pytest.mark.parametrize(
+        "invalid_content, expected_error",
+        [
+            ("2", "at least 2 characters long"),
+            ("a" * 3001, "cannot exceed 3000 characters"),
+        ]
+    )
+    def test_create_comment_with_invalid_length_fails(
+        self,
+        api_client,
+        user_factory,
+        post_factory,
+        invalid_content,
+        expected_error
+    ):
+        post = post_factory(active=True)
+        user = user_factory(username="another_commenter")
+        api_client.force_authenticate(user=user)
+        url = reverse('post-comment-create', kwargs={'post_pk': post.pk})
+        data = {"content": invalid_content}
+
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert expected_error in str(response.data['content'])
+        assert post.comments.count() == 0
