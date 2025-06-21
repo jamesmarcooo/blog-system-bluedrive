@@ -1,20 +1,40 @@
+from typing import Type
+
 import django_filters
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet, DateFromToRangeFilter
-from rest_framework import viewsets, generics, permissions, status, exceptions
+from django_filters.rest_framework import (
+    DateFromToRangeFilter,
+    DjangoFilterBackend,
+    FilterSet,
+)
+from rest_framework import (
+    exceptions,
+    generics,
+    permissions,
+    serializers,
+    status,
+    viewsets,
+)
 from rest_framework.response import Response
-from typing import Type
 
-from blog.models import Author, Comment, Post
-from api.serializers import PostListSerializer, PostDetailSerializer, PostCreateSerializer, CommentSerializer
 from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (
+    CommentSerializer,
+    PostCreateSerializer,
+    PostDetailSerializer,
+    PostListSerializer,
+)
+from blog.models import Author, Comment, Post
 
 
 class PostFilter(FilterSet):
     published_date = DateFromToRangeFilter()
-    author_name = django_filters.CharFilter(field_name="author__name", lookup_expr="icontains")
+    author_name = django_filters.CharFilter(
+        field_name="author__name",
+        lookup_expr="icontains",
+    )
     title = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
@@ -35,22 +55,26 @@ class PostViewSet(viewsets.ModelViewSet):
             return queryset.select_related("author").prefetch_related("comments")
         return queryset
 
-    def get_serializer_class(self) -> Type[PostListSerializer | PostDetailSerializer | PostCreateSerializer]:
+    def get_serializer_class(
+        self,
+    ) -> Type[PostListSerializer | PostDetailSerializer | PostCreateSerializer]:
         if self.action == "list":
             return PostListSerializer
         if self.action == "create":
             return PostCreateSerializer
         return PostDetailSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: serializers.ModelSerializer) -> None:
         if not self.request.user.is_authenticated:
             raise exceptions.PermissionDenied("You must be logged in to create a post.")
 
         try:
             author: Author = Author.objects.get(user=self.request.user)
             serializer.save(author=author)
-        except Author.DoesNotExist:
-            raise exceptions.PermissionDenied("You do not have an author profile to create a post.")
+        except Author.DoesNotExist as err:
+            raise exceptions.PermissionDenied(
+                "You do not have an author profile to create a post.",
+            ) from err
 
 
 class CommentCreateAPIView(generics.CreateAPIView):
@@ -58,12 +82,15 @@ class CommentCreateAPIView(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
 
-    def create(self, request: Response, **kwargs: dict) -> Response:
+    def create(self, request: Response, **_kwargs: dict) -> Response:
         post_id: int = self.kwargs.get("post_pk")
         try:
             post: Post = Post.objects.get(pk=post_id)
         except Post.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Post not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         if not post.active:
             return Response(
@@ -79,4 +106,8 @@ class CommentCreateAPIView(generics.CreateAPIView):
 
         headers: dict[str, str] = self.get_success_headers(serializer.data)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )

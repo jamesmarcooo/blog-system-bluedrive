@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from blog.models import Author, Post, Comment
-from django.contrib.auth.models import User
+
+from blog.models import Author, Comment, Post
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -31,7 +31,16 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "title", "content", "published_date", "author_name", "active",  "status", "comments"]
+        fields = [
+            "id",
+            "title",
+            "content",
+            "published_date",
+            "author_name",
+            "active",
+            "status",
+            "comments",
+        ]
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
