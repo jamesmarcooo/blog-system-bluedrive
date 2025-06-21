@@ -135,6 +135,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env.prod
+.zshrc
+
 
 # Spyder project settings
 .spyderproject
@@ -192,5 +195,3 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
-
-.zshrc
