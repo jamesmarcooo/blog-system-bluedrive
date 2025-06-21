@@ -50,3 +50,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["id", "title", "content","published_date", "author_name","status"]
 
+
+    def validate_title(self, value):
+        if Post.objects.filter(title__exact=value).exists():
+            raise serializers.ValidationError("A post with this title already exists.")
+        return value

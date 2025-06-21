@@ -72,6 +72,19 @@ class TestPostCreation:
         assert "You do not have an author profile" in response.data["detail"]
         assert Post.objects.count() == 0
 
+    def test_create_post_with_duplicate_title_fails(self, authenticated_author_client, post_factory):
+        client, author = authenticated_author_client
+
+        post_factory(title="A Unique Title")
+        url = reverse("post-list")
+
+        data = {"title": "A Unique Title", "content": "Some other content."}
+        response = client.post(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "A post with this title already exists." in str(response.data['title'])
+        assert Post.objects.count() == 1
+
 
 class TestPostEditing:
     def test_edit_post_as_owner_succeeds(self, authenticated_author_client, post_factory):
