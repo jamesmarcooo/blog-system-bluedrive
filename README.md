@@ -44,7 +44,7 @@ This method handles all dependencies, services, and networking automatically.
 2.  **Configure the Environment**
     Copy the example environment file. The default values are configured for the Docker Compose setup.
     ```bash
-    cp .env.example .env
+    cp .env.example .env.prod
     ```
 
 3.  **Build and Run with Docker Compose**
