@@ -150,8 +150,8 @@ docker-compose exec blog-system pytest tests/test_blog_api.py -k "delete"
 
 The API is versioned and accessible under the `/api/v1/` prefix.
 
-*   **Interactive Docs (Swagger UI):** `http://127.0.0.1:8001/api/docs/`
-*   **Django Admin:** `http://127.0.0.1:8001/admin/`
+*   **Interactive Docs (Swagger UI):** [http://127.0.0.1:8001/api/v1/docs/](http://127.0.0.1:8001/api/v1/docs/)
+*   **Django Admin:** [http://127.0.0.1:8001/admin/](http://127.0.0.1:8001/admin/)
 
 ### Example `cURL` Requests
 
