@@ -20,7 +20,7 @@ from rest_framework import (
 from rest_framework.response import Response
 
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (
+from api.v1.serializers import (
     CommentSerializer,
     PostCreateSerializer,
     PostDetailSerializer,

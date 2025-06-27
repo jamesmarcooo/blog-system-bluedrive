@@ -1,16 +1,6 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
-
-from api.views import CommentCreateAPIView, PostViewSet
-
-router = DefaultRouter()
-router.register(r"posts", PostViewSet, basename="post")
+from django.urls import path, include
 
 urlpatterns = [
-    path("", include(router.urls)),
-        path(
-        "posts/<int:post_pk>/comments/",
-        CommentCreateAPIView.as_view(),
-        name="post-comment-create",
-    ),
+    path("v1/", include("api.v1.urls")),
+    path("v2/", include("api.v2.urls")),
 ]
